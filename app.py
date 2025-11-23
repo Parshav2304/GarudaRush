@@ -95,7 +95,7 @@ def store_in_database(record_type, data):
     return record
 
 # Header
-st.markdown('<h1 class="main-header">🛡️ GarudaRush</h1>', unsafe_allow_html=True)
+st.markdown('<h1 class="main-header">GarudaRush</h1>', unsafe_allow_html=True)
 st.markdown('<p class="sub-header">ML-Enhanced Agent-Based DDoS Detection System</p>', unsafe_allow_html=True)
 
 # Main tabs
@@ -288,7 +288,6 @@ with tab2:
 st.markdown("""
 <div class="footer">
     <p><strong>GarudaRush</strong> - ML-Enhanced DDoS Detection</p>
-    <p>By <strong>Sourav Rinwa, Parshav Shah, Arvind Sharma</strong> • Guide: <strong>Mr. Utsav Dagar</strong></p>
 </div>
 """, unsafe_allow_html=True)
 
