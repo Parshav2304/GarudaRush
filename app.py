@@ -547,16 +547,16 @@ st.markdown("""
 if st.session_state.monitoring:
     time.sleep(2)
     st.rerun()
-# ```
+```
 
-# ---
+---
 
 ## **Now Your GitHub Repository Structure:**
-# ```
-# GarudaRush-Prototype/
-# ├── streamlit_app_with_db.py   ← NEW: Enhanced version with visible database
-# ├── requirements.txt            ← Same as before
-# ├── README.md                   ← Update this
-# ├── .gitignore                  
-# └── .streamlit/
-#     └── config.toml
+```
+GarudaRush-Prototype/
+├── streamlit_app_with_db.py   ← NEW: Enhanced version with visible database
+├── requirements.txt            ← Same as before
+├── README.md                   ← Update this
+├── .gitignore                  
+└── .streamlit/
+    └── config.toml
