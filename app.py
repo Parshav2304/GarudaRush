@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
-GarudaRush Prototype - WITH VISIBLE DATABASE
-Enhanced version showing database operations clearly
+GarudaRush Prototype - Streamlit Dashboard
+ML-Enhanced Agent-Based Intrusion Detection System
+Simplified version for demonstration
 """
 
 import streamlit as st
@@ -15,7 +16,7 @@ import json
 
 # Page configuration
 st.set_page_config(
-    page_title="GarudaRush - DDoS Detection with Database",
+    page_title="GarudaRush - DDoS Detection Prototype",
     page_icon="🛡️",
     layout="wide",
     initial_sidebar_state="collapsed"
@@ -39,13 +40,6 @@ st.markdown("""
         font-size: 1rem;
         margin-bottom: 2rem;
     }
-    .db-box {
-        background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
-        padding: 1.5rem;
-        border-radius: 0.75rem;
-        border: 2px solid #3b82f6;
-        margin: 1rem 0;
-    }
     .alert-box {
         background: linear-gradient(135deg, #7f1d1d 0%, #991b1b 100%);
         padding: 1rem;
@@ -53,78 +47,26 @@ st.markdown("""
         border-left: 4px solid #ef4444;
         margin-bottom: 0.5rem;
     }
-    .record-box {
-        background: rgba(30, 41, 59, 0.8);
+    .stButton>button {
+        width: 100%;
+        background: linear-gradient(90deg, #3b82f6 0%, #06b6d4 100%);
+        color: white;
+        font-weight: 600;
+        border: none;
         padding: 0.75rem;
         border-radius: 0.5rem;
-        border-left: 3px solid #10b981;
-        margin-bottom: 0.5rem;
-        font-family: 'Courier New', monospace;
+    }
+    .footer {
+        text-align: center;
+        color: #94a3b8;
+        padding: 2rem 0;
+        margin-top: 2rem;
+        border-top: 1px solid #334155;
     }
 </style>
 """, unsafe_allow_html=True)
 
-# ==================== DATABASE MANAGER ====================
-class SimpleDatabase:
-    """Simple database that shows every operation"""
-    
-    def __init__(self):
-        if 'db_records' not in st.session_state:
-            st.session_state.db_records = []
-        if 'db_logs' not in st.session_state:
-            st.session_state.db_logs = []
-    
-    def insert(self, record_type, data):
-        """Insert record and log the operation"""
-        record = {
-            'id': f"REC-{len(st.session_state.db_records) + 1:05d}",
-            'timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3],
-            'type': record_type,
-            'data': data
-        }
-        
-        st.session_state.db_records.append(record)
-        
-        # Log the operation
-        log_entry = {
-            'time': datetime.now().strftime("%H:%M:%S"),
-            'operation': 'INSERT',
-            'collection': record_type,
-            'record_id': record['id'],
-            'status': '✅ SUCCESS'
-        }
-        st.session_state.db_logs.append(log_entry)
-        
-        return record
-    
-    def get_stats(self):
-        """Get database statistics"""
-        total = len(st.session_state.db_records)
-        alerts = len([r for r in st.session_state.db_records if r['type'] == 'alert'])
-        traffic = len([r for r in st.session_state.db_records if r['type'] == 'traffic'])
-        
-        return {
-            'total': total,
-            'alerts': alerts,
-            'traffic': traffic,
-            'size_kb': total * 0.5  # Approximate size
-        }
-    
-    def get_recent(self, limit=10):
-        """Get recent records"""
-        return st.session_state.db_records[-limit:][::-1]
-    
-    def get_logs(self, limit=20):
-        """Get recent database operation logs"""
-        return st.session_state.db_logs[-limit:][::-1]
-
-# Initialize database
-if 'db' not in st.session_state:
-    st.session_state.db = SimpleDatabase()
-
-db = st.session_state.db
-
-# Initialize other session state
+# Initialize session state
 if 'monitoring' not in st.session_state:
     st.session_state.monitoring = False
 if 'total_packets' not in st.session_state:
@@ -145,27 +87,28 @@ if 'attack_distribution' not in st.session_state:
         'Slowloris': 0,
         'DNS Amplification': 0
     }
+if 'db_records' not in st.session_state:
+    st.session_state.db_records = []
+if 'detection_threshold' not in st.session_state:
+    st.session_state.detection_threshold = 0.85
+if 'update_interval' not in st.session_state:
+    st.session_state.update_interval = 2
+
+# Simulate database storage
+def store_in_database(record_type, data):
+    """Simulate storing data in database"""
+    record = {
+        'id': len(st.session_state.db_records) + 1,
+        'timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        'type': record_type,
+        'data': data
+    }
+    st.session_state.db_records.append(record)
+    return record
 
 # Header
 st.markdown('<h1 class="main-header">🛡️ GarudaRush</h1>', unsafe_allow_html=True)
-st.markdown('<p class="sub-header">ML-Enhanced DDoS Detection with Real-Time Database Operations</p>', unsafe_allow_html=True)
-
-# Database Status Bar (Always Visible)
-st.markdown('<div class="db-box">', unsafe_allow_html=True)
-col1, col2, col3, col4 = st.columns(4)
-stats = db.get_stats()
-
-with col1:
-    st.markdown("### 💾 Database")
-    st.markdown("**Type:** Session Storage")
-with col2:
-    st.metric("Total Records", stats['total'])
-with col3:
-    st.metric("Alert Records", stats['alerts'])
-with col4:
-    st.metric("Traffic Records", stats['traffic'])
-
-st.markdown('</div>', unsafe_allow_html=True)
+st.markdown('<p class="sub-header">ML-Enhanced Agent-Based DDoS Detection System - Prototype</p>', unsafe_allow_html=True)
 
 # Main tabs
 tab1, tab2 = st.tabs(["📊 Dashboard", "📈 Analysis"])
@@ -180,7 +123,7 @@ with tab1:
                      use_container_width=True):
             st.session_state.monitoring = not st.session_state.monitoring
             if st.session_state.monitoring:
-                st.success("✅ Monitoring started! Database operations will be logged below...")
+                st.success("✅ Monitoring started! System is now detecting attacks...")
             else:
                 st.info("⏸️ Monitoring paused.")
     
@@ -190,131 +133,144 @@ with tab1:
     col1, col2, col3, col4 = st.columns(4)
     
     with col1:
-        st.metric("📦 Total Packets", f"{st.session_state.total_packets:,}")
+        st.metric(
+            label="📦 Total Packets",
+            value=f"{st.session_state.total_packets:,}",
+            delta=f"+{np.random.randint(50, 150)}" if st.session_state.monitoring else None
+        )
+    
     with col2:
-        st.metric("🚨 Attacks Detected", st.session_state.attacks_detected)
+        st.metric(
+            label="🚨 Attacks Detected",
+            value=st.session_state.attacks_detected,
+            delta=f"+{np.random.randint(0, 2)}" if st.session_state.monitoring else None,
+            delta_color="inverse"
+        )
+    
     with col3:
-        st.metric("✅ Normal Traffic", f"{st.session_state.normal_traffic:,}")
+        st.metric(
+            label="✅ Normal Traffic",
+            value=f"{st.session_state.normal_traffic:,}",
+            delta=f"+{np.random.randint(40, 140)}" if st.session_state.monitoring else None
+        )
+    
     with col4:
-        st.metric("🎯 Accuracy", "96.5%")
+        accuracy = 96.5 if st.session_state.total_packets > 0 else 0
+        st.metric(
+            label="🎯 Accuracy",
+            value=f"{accuracy}%"
+        )
     
     st.divider()
     
-    # Real-Time Traffic with Database Operations
-    col_left, col_right = st.columns([2, 1])
+    # Real-Time Traffic Visualization
+    st.subheader("📡 Real-Time Traffic Monitor")
     
-    with col_left:
-        st.subheader("📡 Real-Time Traffic Monitor")
+    # Generate traffic data when monitoring
+    if st.session_state.monitoring:
+        current_time = datetime.now().strftime("%H:%M:%S")
         
-        # Generate traffic data when monitoring
-        if st.session_state.monitoring:
-            current_time = datetime.now().strftime("%H:%M:%S")
-            
-            # Generate packet data
-            normal = np.random.randint(50, 150)
-            suspicious = np.random.randint(0, 30)
-            attack = np.random.randint(0, 20)
-            
-            st.session_state.traffic_data.append({
-                'time': current_time,
-                'normal': normal,
-                'suspicious': suspicious,
-                'attack': attack
-            })
-            
-            if len(st.session_state.traffic_data) > 30:
-                st.session_state.traffic_data.pop(0)
-            
-            # Update counters
-            st.session_state.total_packets += (normal + suspicious + attack)
-            st.session_state.normal_traffic += normal
-            
-            # 🔥 STORE IN DATABASE - VISIBLE OPERATION
-            db_record = db.insert('traffic', {
-                'normal_packets': normal,
-                'suspicious_packets': suspicious,
-                'attack_packets': attack,
-                'total': normal + suspicious + attack
-            })
-            
-            # Randomly generate attacks
-            if np.random.random() > 0.85:
-                st.session_state.attacks_detected += 1
-                attack_type = np.random.choice(list(st.session_state.attack_distribution.keys()))
-                st.session_state.attack_distribution[attack_type] += 1
-                
-                # Create alert
-                alert = {
-                    'id': len(st.session_state.alerts) + 1,
-                    'time': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                    'type': attack_type,
-                    'severity': np.random.choice(['Critical', 'High', 'Medium']),
-                    'source': f"{np.random.randint(1,255)}.{np.random.randint(1,255)}.{np.random.randint(1,255)}.{np.random.randint(1,255)}",
-                    'destination': f"192.168.1.{np.random.randint(1,255)}",
-                    'confidence': round(np.random.uniform(85, 99), 1)
-                }
-                st.session_state.alerts.insert(0, alert)
-                
-                # 🔥 STORE ALERT IN DATABASE - VISIBLE OPERATION
-                db_alert = db.insert('alert', alert)
-                
-                st.session_state.alerts = st.session_state.alerts[:15]
+        # Generate packet data
+        normal = np.random.randint(50, 150)
+        suspicious = np.random.randint(0, 30)
+        attack = np.random.randint(0, 20)
         
-        # Display traffic chart
-        if st.session_state.traffic_data:
-            df = pd.DataFrame(st.session_state.traffic_data)
+        st.session_state.traffic_data.append({
+            'time': current_time,
+            'normal': normal,
+            'suspicious': suspicious,
+            'attack': attack
+        })
+        
+        # Keep only last 30 points
+        if len(st.session_state.traffic_data) > 30:
+            st.session_state.traffic_data.pop(0)
+        
+        # Update counters
+        st.session_state.total_packets += (normal + suspicious + attack)
+        st.session_state.normal_traffic += normal
+        
+        # Store packet data in simulated database
+        store_in_database('traffic', {
+            'normal': normal,
+            'suspicious': suspicious,
+            'attack': attack
+        })
+        
+        # Randomly generate attacks
+        if np.random.random() > 0.85:
+            st.session_state.attacks_detected += 1
+            attack_type = np.random.choice(list(st.session_state.attack_distribution.keys()))
+            st.session_state.attack_distribution[attack_type] += 1
             
-            fig = go.Figure()
-            fig.add_trace(go.Scatter(
-                x=df['time'], y=df['normal'],
-                mode='lines+markers', name='Normal',
-                line=dict(color='#10b981', width=3),
-                fill='tozeroy'
-            ))
-            fig.add_trace(go.Scatter(
-                x=df['time'], y=df['suspicious'],
-                mode='lines+markers', name='Suspicious',
-                line=dict(color='#f59e0b', width=3),
-                fill='tozeroy'
-            ))
-            fig.add_trace(go.Scatter(
-                x=df['time'], y=df['attack'],
-                mode='lines+markers', name='Attack',
-                line=dict(color='#ef4444', width=3),
-                fill='tozeroy'
-            ))
+            # Create alert
+            alert = {
+                'id': len(st.session_state.alerts) + 1,
+                'time': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                'type': attack_type,
+                'severity': np.random.choice(['Critical', 'High', 'Medium'], p=[0.2, 0.5, 0.3]),
+                'source': f"{np.random.randint(1,255)}.{np.random.randint(1,255)}.{np.random.randint(1,255)}.{np.random.randint(1,255)}",
+                'destination': f"192.168.1.{np.random.randint(1,255)}",
+                'confidence': round(np.random.uniform(85, 99), 1)
+            }
+            st.session_state.alerts.insert(0, alert)
             
-            fig.update_layout(
-                xaxis_title="Time",
-                yaxis_title="Packets/Second",
-                height=350,
-                plot_bgcolor='rgba(15, 23, 42, 0.5)',
-                paper_bgcolor='rgba(0,0,0,0)',
-                font=dict(color='white')
+            # Store alert in database
+            store_in_database('alert', alert)
+            
+            # Keep only last 15 alerts
+            st.session_state.alerts = st.session_state.alerts[:15]
+    
+    # Display traffic chart
+    if st.session_state.traffic_data:
+        df = pd.DataFrame(st.session_state.traffic_data)
+        
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(
+            x=df['time'], y=df['normal'],
+            mode='lines+markers',
+            name='Normal',
+            line=dict(color='#10b981', width=3),
+            fill='tozeroy',
+            fillcolor='rgba(16, 185, 129, 0.2)'
+        ))
+        fig.add_trace(go.Scatter(
+            x=df['time'], y=df['suspicious'],
+            mode='lines+markers',
+            name='Suspicious',
+            line=dict(color='#f59e0b', width=3),
+            fill='tozeroy',
+            fillcolor='rgba(245, 158, 11, 0.2)'
+        ))
+        fig.add_trace(go.Scatter(
+            x=df['time'], y=df['attack'],
+            mode='lines+markers',
+            name='Attack',
+            line=dict(color='#ef4444', width=3),
+            fill='tozeroy',
+            fillcolor='rgba(239, 68, 68, 0.2)'
+        ))
+        
+        fig.update_layout(
+            xaxis_title="Time",
+            yaxis_title="Packets per Second",
+            height=400,
+            hovermode='x unified',
+            plot_bgcolor='rgba(15, 23, 42, 0.5)',
+            paper_bgcolor='rgba(0,0,0,0)',
+            font=dict(color='white', size=12),
+            legend=dict(
+                orientation="h",
+                yanchor="bottom",
+                y=1.02,
+                xanchor="right",
+                x=1
             )
-            
-            st.plotly_chart(fig, use_container_width=True)
-        else:
-            st.info("👆 Click 'Start Monitoring' to begin...")
-    
-    with col_right:
-        st.subheader("🔍 Live Database Operations")
+        )
         
-        # Show real-time database logs
-        logs = db.get_logs(limit=10)
-        
-        if logs:
-            for log in logs:
-                st.markdown(
-                    f'<div class="record-box">'
-                    f'<strong>{log["time"]}</strong> - {log["operation"]}<br>'
-                    f'Collection: <code>{log["collection"]}</code><br>'
-                    f'ID: <code>{log["record_id"]}</code> {log["status"]}'
-                    f'</div>',
-                    unsafe_allow_html=True
-                )
-        else:
-            st.info("No database operations yet")
+        st.plotly_chart(fig, use_container_width=True)
+    else:
+        st.info("👆 Click 'Start Monitoring' to see real-time traffic data...")
     
     st.divider()
     
@@ -322,129 +278,312 @@ with tab1:
     st.subheader("🚨 Recent Security Alerts")
     
     if st.session_state.alerts:
-        for alert in st.session_state.alerts[:5]:
+        for alert in st.session_state.alerts[:5]:  # Show only 5 most recent
             severity_colors = {
                 'Critical': '#dc2626',
                 'High': '#f97316',
                 'Medium': '#eab308'
             }
-            severity_color = severity_colors.get(alert['severity'], '#3b82f6')
+            severity_color = severity_colors.get(alert.get('severity', 'Medium'), '#3b82f6')
             
-            col1, col2, col3 = st.columns([3, 2, 1])
-            
-            with col1:
-                st.markdown(f"### 🔴 {alert['type']}")
-                st.caption(f"🕐 {alert['time']}")
-            
-            with col2:
-                st.markdown(f"**Source:** {alert['source']}")
-                st.markdown(f"**Destination:** {alert['destination']}")
-                st.caption(f"Confidence: {alert['confidence']}%")
-            
-            with col3:
-                st.markdown(
-                    f"<div style='background-color: {severity_color}; padding: 8px 16px; "
-                    f"border-radius: 20px; text-align: center; font-weight: 600;'>"
-                    f"{alert['severity']}</div>",
-                    unsafe_allow_html=True
-                )
-            
-            st.divider()
-    else:
-        st.success("✅ No threats detected!")
-    
-    st.divider()
-    
-    # Database Records Viewer
-    st.subheader("💾 Database Records (Last 10 Entries)")
-    
-    records = db.get_recent(limit=10)
-    
-    if records:
-        for record in records:
-            record_color = '#10b981' if record['type'] == 'traffic' else '#ef4444'
-            
-            with st.expander(f"📝 {record['id']} - {record['type'].upper()} - {record['timestamp']}"):
-                col1, col2 = st.columns([1, 3])
+            with st.container():
+                col1, col2, col3 = st.columns([3, 2, 1])
                 
                 with col1:
-                    st.markdown("**Record Info:**")
-                    st.write(f"ID: `{record['id']}`")
-                    st.write(f"Type: `{record['type']}`")
-                    st.write(f"Time: `{record['timestamp']}`")
+                    st.markdown(f"### 🔴 {alert.get('type', 'Unknown Attack')}")
+                    st.caption(f"🕐 {alert.get('time', 'N/A')}")
                 
                 with col2:
-                    st.markdown("**Stored Data:**")
-                    st.json(record['data'])
+                    st.markdown(f"**Source:** {alert.get('source', 'Unknown')}")
+                    st.markdown(f"**Destination:** {alert.get('destination', '192.168.1.1')}")
+                    st.caption(f"Confidence: {alert.get('confidence', 0)}%")
+                
+                with col3:
+                    st.markdown(
+                        f"<div style='background-color: {severity_color}; padding: 8px 16px; "
+                        f"border-radius: 20px; text-align: center; font-weight: 600;'>"
+                        f"{alert.get('severity', 'Medium')}</div>",
+                        unsafe_allow_html=True
+                    )
+                
+                st.divider()
     else:
-        st.info("No records in database yet. Start monitoring to collect data.")
+        st.success("✅ No threats detected. Your network is secure!")
     
     st.divider()
     
-    # Settings Section
-    st.subheader("⚙️ System Settings")
+    # Database Storage Information
+    st.subheader("💾 Database Storage Status")
     
     col1, col2, col3 = st.columns(3)
     
     with col1:
-        if st.button("🔄 Reset All Data", use_container_width=True):
-            st.session_state.db_records = []
-            st.session_state.db_logs = []
+        total_records = len(st.session_state.db_records)
+        st.metric("Total Records Stored", total_records)
+    
+    with col2:
+        alert_records = len([r for r in st.session_state.db_records if r['type'] == 'alert'])
+        st.metric("Alert Records", alert_records)
+    
+    with col3:
+        traffic_records = len([r for r in st.session_state.db_records if r['type'] == 'traffic'])
+        st.metric("Traffic Records", traffic_records)
+    
+    # Show recent database entries
+    if st.session_state.db_records:
+        with st.expander("📋 View Recent Database Entries (Last 10)"):
+            recent_records = st.session_state.db_records[-10:][::-1]
+            for record in recent_records:
+                st.json({
+                    'ID': record['id'],
+                    'Timestamp': record['timestamp'],
+                    'Type': record['type'],
+                    'Data': record['data']
+                })
+    
+    st.divider()
+    
+    # Settings Section (at bottom)
+    st.subheader("⚙️ System Settings")
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        new_threshold = st.slider(
+            "🎯 Detection Threshold",
+            min_value=0.0,
+            max_value=1.0,
+            value=st.session_state.detection_threshold,
+            step=0.05,
+            help="Lower threshold = More sensitive (more detections, possibly more false positives)"
+        )
+        if new_threshold != st.session_state.detection_threshold:
+            st.session_state.detection_threshold = new_threshold
+            st.success(f"✅ Threshold updated to {new_threshold}")
+    
+    with col2:
+        new_interval = st.slider(
+            "⏱️ Update Interval (seconds)",
+            min_value=1,
+            max_value=10,
+            value=st.session_state.update_interval,
+            step=1,
+            help="How often the dashboard refreshes"
+        )
+        if new_interval != st.session_state.update_interval:
+            st.session_state.update_interval = new_interval
+            st.success(f"✅ Interval updated to {new_interval}s")
+    
+    # Action Buttons
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        if st.button("🔄 Reset Statistics", use_container_width=True):
             st.session_state.total_packets = 0
             st.session_state.attacks_detected = 0
             st.session_state.normal_traffic = 0
             st.session_state.alerts = []
             st.session_state.traffic_data = []
-            st.success("✅ All data reset!")
+            st.session_state.attack_distribution = {k: 0 for k in st.session_state.attack_distribution}
+            st.success("✅ Statistics reset successfully!")
             st.rerun()
     
     with col2:
         if st.button("💾 Export Database", use_container_width=True):
-            export_data = {
-                'export_time': datetime.now().isoformat(),
-                'stats': stats,
-                'records': st.session_state.db_records,
-                'logs': st.session_state.db_logs
-            }
-            st.download_button(
-                label="⬇️ Download JSON",
-                data=json.dumps(export_data, indent=2),
-                file_name=f"garudarush_db_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json",
-                mime="application/json"
-            )
-    
-    with col3:
-        st.metric("Database Size", f"{stats['size_kb']:.1f} KB")
+            if st.session_state.db_records:
+                export_data = {
+                    'export_time': datetime.now().isoformat(),
+                    'total_records': len(st.session_state.db_records),
+                    'records': st.session_state.db_records
+                }
+                st.download_button(
+                    label="⬇️ Download JSON",
+                    data=json.dumps(export_data, indent=2),
+                    file_name=f"garudarush_db_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json",
+                    mime="application/json",
+                    use_container_width=True
+                )
+            else:
+                st.warning("⚠️ No data to export yet. Start monitoring first!")
 
 # ==================== ANALYSIS TAB ====================
 with tab2:
-    st.subheader("📈 System Analytics & Database Performance")
+    st.subheader("📈 System Analytics & Performance")
     
-    # Database Analytics
+    # Attack Distribution
     col1, col2 = st.columns(2)
     
     with col1:
-        st.markdown("### 📊 Database Growth Over Time")
+        st.markdown("### 🎯 Attack Type Distribution")
         
-        if st.session_state.db_records:
-            # Create time-based chart
+        if sum(st.session_state.attack_distribution.values()) > 0:
+            fig = go.Figure(data=[go.Pie(
+                labels=list(st.session_state.attack_distribution.keys()),
+                values=list(st.session_state.attack_distribution.values()),
+                hole=0.4,
+                marker=dict(colors=['#ef4444', '#f97316', '#eab308', '#22c55e', '#3b82f6']),
+                textinfo='label+percent',
+                textfont=dict(size=14)
+            )])
+            
+            fig.update_layout(
+                height=400,
+                showlegend=True,
+                plot_bgcolor='rgba(0,0,0,0)',
+                paper_bgcolor='rgba(0,0,0,0)',
+                font=dict(color='white')
+            )
+            
+            st.plotly_chart(fig, use_container_width=True)
+        else:
+            st.info("📊 No attack data available. Start monitoring to see distribution.")
+    
+    with col2:
+        st.markdown("### 🏆 Model Performance Metrics")
+        
+        metrics_data = pd.DataFrame({
+            'Metric': ['Accuracy', 'Precision', 'Recall', 'F1-Score'],
+            'Value': [96.5, 95.8, 97.2, 96.5]
+        })
+        
+        fig = go.Figure(data=[go.Bar(
+            x=metrics_data['Metric'],
+            y=metrics_data['Value'],
+            marker_color=['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6'],
+            text=metrics_data['Value'].apply(lambda x: f"{x}%"),
+            textposition='outside',
+            textfont=dict(size=14, color='white')
+        )])
+        
+        fig.update_layout(
+            height=400,
+            yaxis_range=[0, 105],
+            yaxis_title="Percentage (%)",
+            plot_bgcolor='rgba(15, 23, 42, 0.5)',
+            paper_bgcolor='rgba(0,0,0,0)',
+            font=dict(color='white'),
+            showlegend=False
+        )
+        
+        st.plotly_chart(fig, use_container_width=True)
+    
+    st.divider()
+    
+    # Detection Statistics
+    st.markdown("### 📊 Detection Statistics")
+    
+    col1, col2, col3, col4 = st.columns(4)
+    
+    with col1:
+        st.metric("Total Detections", st.session_state.attacks_detected)
+    
+    with col2:
+        detection_rate = (st.session_state.attacks_detected / st.session_state.total_packets * 100) if st.session_state.total_packets > 0 else 0
+        st.metric("Attack Rate", f"{detection_rate:.2f}%")
+    
+    with col3:
+        st.metric("False Positive Rate", "3.2%")
+    
+    with col4:
+        st.metric("Avg Detection Time", "3.2s")
+    
+    st.divider()
+    
+    # System Performance
+    st.markdown("### 💻 System Performance")
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        performance_data = pd.DataFrame({
+            'Component': ['CPU Usage', 'Memory Usage', 'Network I/O', 'Disk I/O'],
+            'Usage': [23, 45, 67, 12]
+        })
+        
+        fig = go.Figure(data=[go.Bar(
+            y=performance_data['Component'],
+            x=performance_data['Usage'],
+            orientation='h',
+            marker=dict(
+                color=performance_data['Usage'],
+                colorscale='RdYlGn_r',
+                showscale=False
+            ),
+            text=performance_data['Usage'].apply(lambda x: f"{x}%"),
+            textposition='outside'
+        )])
+        
+        fig.update_layout(
+            title="Resource Utilization",
+            xaxis_title="Usage (%)",
+            xaxis_range=[0, 100],
+            height=300,
+            plot_bgcolor='rgba(15, 23, 42, 0.5)',
+            paper_bgcolor='rgba(0,0,0,0)',
+            font=dict(color='white')
+        )
+        
+        st.plotly_chart(fig, use_container_width=True)
+    
+    with col2:
+        # Processing statistics
+        st.markdown("#### ⚡ Processing Statistics")
+        
+        stats_df = pd.DataFrame({
+            'Metric': ['Packets/Second', 'Throughput', 'Latency', 'Memory Footprint'],
+            'Value': ['15,000', '10 Gbps', '< 5s', '1.2 GB']
+        })
+        
+        st.dataframe(
+            stats_df,
+            use_container_width=True,
+            hide_index=True
+        )
+        
+        st.markdown("#### 🔧 System Info")
+        system_info = {
+            'ML Model': 'Random Forest',
+            'Database': 'MongoDB (Simulated)',
+            'Python Version': '3.8+',
+            'Model Accuracy': '96.5%'
+        }
+        
+        for key, value in system_info.items():
+            col_a, col_b = st.columns([2, 1])
+            with col_a:
+                st.write(f"**{key}:**")
+            with col_b:
+                st.write(value)
+    
+    st.divider()
+    
+    # Database Analytics
+    st.markdown("### 💾 Database Analytics")
+    
+    if st.session_state.db_records:
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            # Records over time
             df_records = pd.DataFrame(st.session_state.db_records)
             df_records['timestamp'] = pd.to_datetime(df_records['timestamp'])
             df_records['minute'] = df_records['timestamp'].dt.strftime('%H:%M')
             
-            growth = df_records.groupby('minute').size().cumsum().reset_index(name='total_records')
+            records_count = df_records.groupby('minute').size().reset_index(name='count')
             
             fig = go.Figure(data=[go.Scatter(
-                x=growth['minute'],
-                y=growth['total_records'],
+                x=records_count['minute'],
+                y=records_count['count'],
                 mode='lines+markers',
                 line=dict(color='#3b82f6', width=3),
-                fill='tozeroy'
+                fill='tozeroy',
+                fillcolor='rgba(59, 130, 246, 0.3)'
             )])
             
             fig.update_layout(
+                title="Database Records Over Time",
                 xaxis_title="Time",
-                yaxis_title="Total Records",
+                yaxis_title="Records Count",
                 height=300,
                 plot_bgcolor='rgba(15, 23, 42, 0.5)',
                 paper_bgcolor='rgba(0,0,0,0)',
@@ -452,14 +591,9 @@ with tab2:
             )
             
             st.plotly_chart(fig, use_container_width=True)
-        else:
-            st.info("No data yet")
-    
-    with col2:
-        st.markdown("### 🗂️ Records by Type")
         
-        if st.session_state.db_records:
-            df_records = pd.DataFrame(st.session_state.db_records)
+        with col2:
+            # Record types distribution
             type_counts = df_records['type'].value_counts()
             
             fig = go.Figure(data=[go.Bar(
@@ -471,6 +605,7 @@ with tab2:
             )])
             
             fig.update_layout(
+                title="Database Record Types",
                 xaxis_title="Record Type",
                 yaxis_title="Count",
                 height=300,
@@ -480,83 +615,22 @@ with tab2:
             )
             
             st.plotly_chart(fig, use_container_width=True)
-        else:
-            st.info("No data yet")
-    
-    st.divider()
-    
-    # Attack Distribution
-    st.markdown("### 🎯 Attack Type Distribution")
-    
-    if sum(st.session_state.attack_distribution.values()) > 0:
-        fig = go.Figure(data=[go.Pie(
-            labels=list(st.session_state.attack_distribution.keys()),
-            values=list(st.session_state.attack_distribution.values()),
-            hole=0.4,
-            marker=dict(colors=['#ef4444', '#f97316', '#eab308', '#22c55e', '#3b82f6'])
-        )])
-        
-        fig.update_layout(
-            height=400,
-            plot_bgcolor='rgba(0,0,0,0)',
-            paper_bgcolor='rgba(0,0,0,0)',
-            font=dict(color='white')
-        )
-        
-        st.plotly_chart(fig, use_container_width=True)
     else:
-        st.info("No attacks detected yet")
-    
-    st.divider()
-    
-    # Database Operations Log
-    st.markdown("### 📝 Database Operation Log (Last 20)")
-    
-    logs = db.get_logs(limit=20)
-    
-    if logs:
-        df_logs = pd.DataFrame(logs)
-        st.dataframe(
-            df_logs,
-            use_container_width=True,
-            hide_index=True,
-            column_config={
-                "time": "Time",
-                "operation": "Operation",
-                "collection": "Collection",
-                "record_id": "Record ID",
-                "status": "Status"
-            }
-        )
-    else:
-        st.info("No operations logged yet")
+        st.info("📊 No database records yet. Start monitoring to collect data.")
 
 # Footer
 st.markdown("""
-<div class="footer" style="text-align: center; color: #94a3b8; padding: 2rem 0; margin-top: 2rem; border-top: 1px solid #334155;">
-    <p><strong>GarudaRush Prototype with Database Visibility</strong></p>
-    <p>Developed by <strong>Sourav Rinwa</strong>, <strong>Parshav Shah</strong>, <strong>Arvind Sharma</strong></p>
+<div class="footer">
+    <p><strong>GarudaRush Prototype</strong> - ML-Enhanced Agent-Based DDoS Detection System</p>
+    <p>Developed by <strong>Sourav Rinwa</strong>, <strong>Parshav Shah</strong>, and <strong>Arvind Sharma</strong></p>
     <p>Guided by <strong>Mr. Utsav Dagar</strong></p>
-    <p style="margin-top: 1rem; font-size: 0.875rem;">
-        💾 Using Session-Based Database (In-Memory Storage for Prototype)
+    <p style="margin-top: 1rem; font-size: 0.875rem; color: #64748b;">
+        💾 All data is simulated and stored in session memory for prototype demonstration
     </p>
 </div>
 """, unsafe_allow_html=True)
 
-# Auto-refresh
+# Auto-refresh when monitoring is active
 if st.session_state.monitoring:
-    time.sleep(2)
+    time.sleep(st.session_state.update_interval)
     st.rerun()
-```
-
----
-
-## **Now Your GitHub Repository Structure:**
-```
-GarudaRush-Prototype/
-├── streamlit_app_with_db.py   ← NEW: Enhanced version with visible database
-├── requirements.txt            ← Same as before
-├── README.md                   ← Update this
-├── .gitignore                  
-└── .streamlit/
-    └── config.toml
