@@ -1,0 +1,19 @@
+# Core Dependencies
+streamlit
+pandas
+numpy
+plotly
+
+# Machine Learning
+scikit-learn
+joblib
+
+# Network Analysis
+pyshark
+
+# Database
+pymongo
+
+# Utilities
+python-dateutil
+Pillow
