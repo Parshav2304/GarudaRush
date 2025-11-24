@@ -15,7 +15,7 @@ import json
 
 # Page configuration
 st.set_page_config(
-    page_title="GarudaRush - DDoS Detection Prototype",
+    page_title="GarudaRush - DDoS Detection",
     page_icon="🛡️",
     layout="wide",
     initial_sidebar_state="collapsed"
@@ -95,7 +95,7 @@ def store_in_database(record_type, data):
     return record
 
 # Header
-st.markdown('<h1 class="main-header">GarudaRush</h1>', unsafe_allow_html=True)
+st.markdown('<h1 class="main-header">🦅GarudaRush</h1>', unsafe_allow_html=True)
 st.markdown('<p class="sub-header">ML-Enhanced Agent-Based DDoS Detection System</p>', unsafe_allow_html=True)
 
 # Main tabs
