@@ -1,0 +1,38 @@
+# Core Flask dependencies
+Flask
+Flask-CORS
+Flask-JWT-Extended
+python-dotenv
+
+# Database
+pymongo
+
+# Security
+Werkzeug
+cryptography
+
+# Machine Learning
+scikit-learn
+numpy
+pandas
+joblib
+
+# Network Monitoring
+pyshark
+scapy
+
+# Data Processing
+python-dateutil
+
+# HTTP Client
+requests
+
+# Utilities
+click
+colorama
+
+# Development
+pytest
+pytest-cov
+black
+flake8
