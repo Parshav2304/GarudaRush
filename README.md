@@ -2,6 +2,14 @@
 
 A comprehensive, production-ready web application for real-time network traffic monitoring and DDoS attack detection using machine learning.
 
+<br/>
+
+<p align="center">
+  <img src="docs/screenshots/dashboard.png" alt="GarudaRush Security Dashboard Mockup" width="800" style="border-radius: 8px; box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 255, 255, 0.1);" />
+</p>
+
+<br/>
+
 ## ✨ Features
 
 ### 🔐 Authentication & Security
@@ -297,21 +305,102 @@ npm test
 - Check agent authentication credentials
 - Ensure backend API is accessible
 
-## 📝 License
+## 📐 System Architecture
 
-This project is part of a capstone project.
+The diagram below maps out how the remote python sniffer intercepts network flows, processes and streams features to the Flask API, runs the classifier, and triggers alerts on the React frontend dashboard:
 
-## 👥 Contributors
+```mermaid
+graph TD
+    %% Define styles
+    classDef agent fill:#1e1e2e,stroke:#f9e2af,stroke-width:2px,color:#cdd6f4;
+    classDef backend fill:#1e1e2e,stroke:#89b4fa,stroke-width:2px,color:#cdd6f4;
+    classDef frontend fill:#1e1e2e,stroke:#cba6f7,stroke-width:2px,color:#cdd6f4;
+    classDef db fill:#1e1e2e,stroke:#a6e3a1,stroke-width:2px,color:#cdd6f4;
 
-Capstone Project Team
+    subgraph Net ["Network Context"]
+        Packets["Live Network Traffic Flow"]
+    end
 
-## 🙏 Acknowledgments
+    subgraph NodeAgent ["Network Agent (agent.py)"]
+        PyShark["PyShark Packet Sniffer"]
+        Parser["Feature Extractor (Headers, Size, Inter-arrival)"]
+        Sender["HTTPS POST Client"]
+    end
+    class PyShark,Parser,Sender agent;
 
-- Flask community
-- React community
-- MongoDB
-- Chart.js
+    subgraph Server ["Backend Services (Flask & Python)"]
+        API["Flask Application (app.py)"]
+        ML["MLDetector (Scikit-Learn Classifier)"]
+        Alerts["Alerts & Severity Handler"]
+    end
+    class API,ML,Alerts backend;
+
+    subgraph Client ["Frontend Client (React SPA)"]
+        Dashboard["React UI Dashboard"]
+        Charts["Chart.js (Real-time Flow Visuals)"]
+        Logs["Alert Management Console"]
+    end
+    class Dashboard,Charts,Logs frontend;
+
+    subgraph Storage ["Data Store"]
+        MongoDB[("MongoDB Database")]
+    end
+    class MongoDB db;
+
+    %% Data flows
+    Packets -->|Sniffs| PyShark
+    PyShark -->|Extracts packet arrays| Parser
+    Parser -->|Buffered JSON stream| Sender
+    Sender -->|REST API POST| API
+    API -->|Sends feature vectors| ML
+    ML -->|Classifies DDoS vs Normal| API
+    API -->|Creates alert entries| Alerts
+    Alerts -->|Writes telemetry & logs| MongoDB
+    API <-->|Reads database metrics| MongoDB
+    Dashboard <-->|Queries REST API| API
+    Charts -->|Displays metrics| Dashboard
+    Logs -->|Acknowledge/Resolve requests| API
+```
 
 ---
 
-**Made with ❤️ for Network Security**
+## 🧠 Machine Learning Detection Engine
+
+To detect active DDoS patterns instead of setting crude request thresholds, GarudaRush uses a supervised machine learning classification pipeline.
+
+### Feature Extraction (Network Agent)
+The network sniffer (`agent.py`) runs in a separate thread. It intercepts packet traffic using **PyShark** and aggregates them into statistical network flows:
+1. **Flow Duration**: Microsecond duration of a continuous transaction window.
+2. **Packet Count**: Total incoming packets within the window.
+3. **Payload Size Variance**: Highlights anomalous bulk volumetric changes.
+4. **Inter-Arrival Time (IAT)**: Evaluates packet spacing (low spacing implies automated flood request scripts).
+
+### Threat Classification (Backend Service)
+- **Model**: Scikit-Learn classification algorithms (optimized Random Forest / SVM) loaded inside `ml_detector.py`.
+- **Real-Time Scoring**: For each request block posted by remote agents, the Flask backend computes threat probabilities.
+- **Alert Escalation**: If threat certainty exceeds a configurable threshold (e.g., 90%), a high-severity alert is raised, saving the malicious IP, timestamp, and signature to the MongoDB cluster.
+
+---
+
+## 👥 Contributors
+
+This project was developed by the Capstone Project Team:
+- **Parshav Shah**
+- **Prince Rupareliya**
+- **Smeet Sadhu**
+- **Mahi Panchal**
+
+---
+
+## 🙏 Acknowledgments
+
+- **Flask** & **React** communities for framework design.
+- **PyShark** team for providing a robust Python interface to tshark.
+- **Chart.js** for interactive live metrics visualizations.
+- **MongoDB** for high-throughput unstructured event storage.
+
+---
+
+## 📝 License
+
+Distributed under the MIT License. See `LICENSE` for more information.
