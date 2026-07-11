@@ -386,9 +386,8 @@ The network sniffer (`agent.py`) runs in a separate thread. It intercepts packet
 
 This project was developed by the Capstone Project Team:
 - **Parshav Shah**
-- **Prince Rupareliya**
-- **Smeet Sadhu**
-- **Mahi Panchal**
+- **Sourav Rinwa**
+- **Arvind Sharma**
 
 ---
 
